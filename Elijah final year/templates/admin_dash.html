@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lecturer Portal | RUN</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body style="background-color: #f8f9fa;">
+    <nav class="navbar navbar-dark px-4 py-3 sticky-top" style="background: #003366; border-bottom: 4px solid #008ba3;">
+        <div class="container-fluid"><img src="{{ url_for('static', filename='logo.png.jfif') }}" height="40"><span class="navbar-brand fw-bold ms-2">RUN ADMIN</span><a href="/logout" class="btn btn-outline-light btn-sm ms-auto">Logout</a></div>
+    </nav>
+    <div class="container mt-4">
+        {% if view_mode == "courses" %}
+            <div class="d-flex justify-content-between mb-4"><h4>Semester Management</h4><a href="/admin_dashboard?view=manage_students" class="btn btn-dark btn-sm">Device Database</a></div>
+            <input type="text" id="cS" class="form-control mb-4 shadow-sm" placeholder="🔍 Search course name or code..." onkeyup="fltr('c-item', 'cS')">
+            <div class="row">
+                {% for c in courses %}
+                <div class="col-md-4 mb-4 c-item">
+                    <div class="card shadow-sm p-4 text-center border-0">
+                        <h4 class="fw-bold text-primary mb-1">{{ c.code }}</h4>
+                        <p class="text-muted small fw-bold">{{ c.title }}</p>
+                        <hr>
+                        {% set act = open_sessions.get(c.code, False) %}
+                        <a href="/admin/toggle_session/{{ c.code }}" class="btn btn-sm {{ 'btn-danger' if act else 'btn-success' }} w-100 mb-2 fw-bold">
+                        {{ 'STOP SESSION' if act else 'START SESSION' }}</a>
+                        <a href="/admin_dashboard?course={{ c.code }}" class="btn btn-sm btn-outline-primary w-100">Summary Records</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% elif view_mode == "students" or view_mode == "manage" %}
+            <div class="d-flex justify-content-between mb-3 align-items-center">
+                <h5>{{ 'Device Control' if view_mode == 'manage' else course_name + ' Summary' }}</h5>
+                <div>{% if view_mode == 'students' %}<a href="/admin/download_course_report/{{ course_name }}" class="btn btn-success btn-sm me-2">Export CSV</a>{% endif %}<a href="/admin_dashboard" class="btn btn-secondary btn-sm">Back</a></div>
+            </div>
+            <input type="text" id="tS" class="form-control mb-3" placeholder="🔍 Search name or matric..." onkeyup="fltr('r-item', 'tS')">
+            <table class="table bg-white shadow-sm rounded">
+                <thead class="table-light"><tr><th>Name</th><th>ID</th><th>Progress</th><th>Action</th></tr></thead>
+                <tbody>
+                    {% if view_mode == "manage" %}
+                        {% for s in students %}<tr class="r-item"><td>{{ s.full_name }}</td><td>{{ s.id_number }}</td><td><span class="badge {{ 'bg-success' if s.device_id else 'bg-secondary' }}">{{ 'Locked' if s.device_id else 'Open' }}</span></td><td><a href="/admin/clear_device/{{ s.id }}" class="btn btn-warning btn-sm" style="font-size: 0.7rem;">Reset Phone</a></td></tr>{% endfor %}
+                    {% else %}
+                        {% for l in summary_logs %}
+                        {% set p = (l.attended / total_held * 100) | round(1) if total_held > 0 else 0 %}
+                        <tr class="r-item"><td>{{ l.full_name }}</td><td>{{ l.matric_no }}</td><td><div class="progress" style="height: 15px;"><div class="progress-bar {{ 'bg-danger' if p < 70 else 'bg-success' }}" style="width: {{ p }}%">{{ l.attended }}/{{ total_held }}</div></div></td><td><b>{{ p }}%</b></td></tr>
+                        {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
+    <script>function fltr(c, i){let v=document.getElementById(i).value.toLowerCase();for(let x of document.getElementsByClassName(c)){x.style.display=x.innerText.toLowerCase().includes(v)?"":"none";}}</script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Portal | RUN</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body style="background-color: #f8f9fa;">
+    <nav class="navbar navbar-dark px-4 py-3 sticky-top" style="background: #003366; border-bottom: 4px solid #008ba3;">
+        <div class="container-fluid"><img src="{{ url_for('static', filename='logo.png.jfif') }}" height="40"><span class="navbar-brand fw-bold ms-2">RUN STUDENT</span><a href="/logout" class="btn btn-outline-light btn-sm ms-auto">Logout</a></div>
+    </nav>
+    <div class="container mt-4">
+        <div class="alert alert-primary shadow-sm">Welcome, <b>{{ full_name }}</b>!</div>
+        <input type="text" id="s" class="form-control mb-4" placeholder="🔍 Search courses..." onkeyup="f()">
+        <div id="l">
+            {% for c in courses %}
+            <div class="card p-3 mb-3 border-0 shadow-sm item">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div style="width: 70%;">
+                        <h6 class="fw-bold mb-0 text-primary">{{ c.code }}</h6>
+                        <small class="text-muted">{{ c.title }}</small>
+                        <div class="progress mt-2" style="height: 10px;">
+                            {% set p = (c.attended/c.total*100) if c.total > 0 else 0 %}
+                            <div class="progress-bar bg-success" style="width: {{ p }}%"></div>
+                        </div>
+                        <small style="font-size: 0.7rem;">Attendance: {{ c.attended }} / {{ c.total }}</small>
+                    </div>
+                    {% if open_sessions.get(c.code, False) %}
+                        <button class="btn btn-sm text-white" style="background:#008ba3;" onclick="mark('{{ c.code }}')">Sign</button>
+                    {% else %}<button class="btn btn-sm btn-secondary" disabled>Closed</button>{% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <script>
+        function f(){
+            let v = document.getElementById('s').value.toLowerCase();
+            for(let i of document.getElementsByClassName('item')){ i.style.display = i.innerText.toLowerCase().includes(v) ? "" : "none"; }
+        }
+        async function mark(cc) {
+            try {
+                if (window.PublicKeyCredential) {
+                    const challenge = new Uint8Array(32); window.crypto.getRandomValues(challenge);
+                    await navigator.credentials.create({
+                        publicKey: {
+                            challenge, rp: { name: "RUN" },
+                            user: { id: new Uint8Array(16), name: "user", displayName: "User" },
+                            pubKeyCredParams: [{ alg: -7, type: "public-key" }],
+                            authenticatorSelection: { userVerification: "required" },
+                            timeout: 60000
+                        }
+                    });
+                }
+                navigator.geolocation.getCurrentPosition(async (pos) => {
+                    const res = await fetch('/mark-attendance', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            course: cc, latitude: pos.coords.latitude, longitude: pos.coords.longitude,
+                            device: navigator.userAgent + screen.width + "x" + screen.height, // MATCHES REGISTRATION
+                            biometric_verified: true
+                        })
+                    });
+                    const d = await res.json(); alert(d.message); location.reload();
+                });
+            } catch (e) { alert("Verification Failed!"); }
+        }
+    </script>
+</body>
+</html>

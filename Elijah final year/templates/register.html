@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register | RUN</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+<body style="background-color: #003366; display: flex; align-items: center; min-height: 100vh;">
+    <div class="container text-center" style="max-width: 400px;">
+        <img src="{{ url_for('static', filename='logo.png.jfif') }}" style="width: 100px;">
+        <h5 class="fw-bold my-2" style="color: #003366;">Register Device</h5>
+        <div class="card p-4 border-0 shadow text-start">
+            <form action="/register" method="POST">
+                <input type="text" name="full_name" class="form-control mb-2" placeholder="Full Name" required>
+                
+                <input type="text" name="id_number" class="form-control mb-2" placeholder="ID Number" required>
+                
+                <input type="email" 
+                       name="email" 
+                       class="form-control mb-2" 
+                       placeholder="School Email (@run.edu.ng)" 
+                       pattern=".+@run\.edu\.ng" 
+                       title="Please use your official @run.edu.ng email address" 
+                       required>
+
+                <select name="role" class="form-select mb-2" required>
+                    <option value="" disabled selected>Select Role</option>
+                    <option value="student">Student</option>
+                    <option value="lecturer">Lecturer</option>
+                </select>
+                
+                <div class="input-group mb-3">
+                    <input type="password" name="password" id="reg_pw" class="form-control" placeholder="Password" required>
+                    <button class="btn btn-outline-secondary" type="button" onclick="toggleReg()">
+                        <i class="bi bi-eye" id="reg_eye"></i>
+                    </button>
+                </div>
+
+                <input type="hidden" name="device_id" id="did">
+                
+                <button type="submit" class="btn w-100 fw-bold text-white" style="background:#008ba3;">REGISTER</button>
+            </form>
+            <div class="mt-3 text-center small">
+                Already registered? <a href="/" class="text-decoration-none fw-bold" style="color: #003366;">Sign In</a>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Automatic Device Binding Logic
+        document.getElementById('did').value = navigator.userAgent + screen.width + "x" + screen.height;
+        
+        // Password Visibility Toggle
+        function toggleReg() {
+            const f = document.getElementById('reg_pw');
+            const i = document.getElementById('reg_eye');
+            f.type = f.type === "password" ? "text" : "password";
+            i.classList.toggle('bi-eye');
+            i.classList.toggle('bi-eye-slash');
+        }
+    </script>
+</body>
+</html>
