@@ -21,11 +21,23 @@ app.config['MAIL_PASSWORD'] = 'egul ooyn xwks krvq'   # Replace with your Google
 mail = Mail(app)
 
 # --- DATABASE SETUP ---
-basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'run_attendance.db')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
 
+basedir = os.path.abspath(os.path.dirname(__file__))
+
+# 1. Look for the live cloud database URL from Render/Supabase
+database_url = os.environ.get('DATABASE_URL')
+
+if database_url:
+    # 2. Fix the link format so SQLAlchemy doesn't crash
+    if database_url.startswith("postgres://"):
+        database_url = database_url.replace("postgres://", "postgresql://", 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+else:
+    # 3. Fallback to your local SQLite file if you're testing offline
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'run_attendance.db')
+
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = LGBTQ_or_SQLAlchemy_placeholder = SQLAlchemy(app) # Use your exact 'db = SQLAlchemy(app)'
 # --- MODELS ---
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
