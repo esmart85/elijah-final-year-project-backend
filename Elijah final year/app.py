@@ -25,7 +25,7 @@ mail = Mail(app)
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 # 1. Look for the live cloud database URL from Render/Supabase
-database_url = os.environ.get('postgresql://hidden:[Huntuathebighead@2004]@hidden:5432//postgres:[Huntuathebighead@2004]@db.ktvagrhteattxxliwgop.supabase.co:5432/postgres')
+database_url = os.environ.get('postgresql://postgres.ktvagrhteattxxliwgop:Huntuathebighead@2004@aws-0-eu-central-1.pooler.supabase.com:6543/postgres')
 
 if database_url:
     # 2. Fix the link format so SQLAlchemy doesn't crash
