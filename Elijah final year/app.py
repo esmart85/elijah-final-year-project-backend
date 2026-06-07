@@ -22,24 +22,19 @@ mail = Mail(app)
 
 # --- DATABASE SETUP ---
 
-# 1. Look for the live cloud database key variable from Render/Supabase
-database_url = os.environ.get('postgresql://postgres.ktvagrhteattxxliwgop:Huntuathebighead%402004@aws-0-eu-central-1.pooler.supabase.com:6543/postgres')
+# --- DATABASE SETUP ---
+import os
 
-if database_url:
-    # 2. Fix the link format so SQLAlchemy connects to Supabase cleanly
-    if database_url.startswith("postgres://"):
-        database_url = database_url.replace("postgres://", "postgresql://", 1)
-    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
-else:
-    # If something goes wrong, break instead of switching back to SQLite
-    raise ValueError("No DATABASE_URL found! Connection to Supabase failed.")
-
+# Putting the clean connection string directly here so Render can't miss it
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres.ktvagrhteattxxliwgop:Huntuathebighead%402004@aws-0-eu-central-1.pooler.supabase.com:6543/postgres'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 db = SQLAlchemy(app)
 
-# 3. This line automatically builds your tables inside SUPABASE the moment the app boots up!
+# Force the tables to build right now
 with app.app_context():
     db.create_all()
+    
 # --- MODELS ---
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
