@@ -21,10 +21,6 @@ app.config['MAIL_PASSWORD'] = 'egul ooyn xwks krvq'   # Replace with your Google
 mail = Mail(app)
 
 # --- DATABASE SETUP ---
-
-# --- DATABASE SETUP ---
-import os
-
 # Putting the clean connection string directly here so Render can't miss it
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres.ktvagrhteattxxliwgop:Huntuathebighead%402004@aws-0-eu-central-1.pooler.supabase.com:6543/postgres'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
