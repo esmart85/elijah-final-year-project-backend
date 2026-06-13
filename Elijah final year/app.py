@@ -23,7 +23,7 @@ mail = Mail(app)
 # --- DATABASE SETUP ---
 
 # Hardcoding your fresh, clean connection link directly
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres.knigevgkfxspdzcivddy:huntuathebighead2004@aws-0-eu-central-1.pooler.supabase.com:6543/postgres'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres.knigevgkfxspdzcivddy:huntuathebighead2004@aws-0-eu-west-1.pooler.supabase.com:5432/postgres'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
