@@ -21,12 +21,15 @@ app.config['MAIL_PASSWORD'] = 'egul ooyn xwks krvq'
 mail = Mail(app)
 
 # --- FIXED DATABASE SETUP (SUPABASE & SQLITE FALLBACK) ---
+# --- FIXED DATABASE SETUP (SUPABASE DRIVER FIX) ---
 database_url = os.environ.get('DATABASE_URL')
 
 if database_url:
-    # Render uses postgres:// by default, but SQLAlchemy needs postgresql://
+    # Fix Render's legacy prefix
     if database_url.startswith("postgres://"):
-        database_url = database_url.replace("postgres://", "postgresql://", 1)
+        database_url = database_url.replace("postgres://", "postgresql+pg8000://", 1)
+    elif database_url.startswith("postgresql://"):
+        database_url = database_url.replace("postgresql://", "postgresql+pg8000://", 1)
     app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 else:
     basedir = os.path.abspath(os.path.dirname(__file__))
