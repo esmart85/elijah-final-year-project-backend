@@ -21,8 +21,17 @@ app.config['MAIL_PASSWORD'] = 'egul ooyn xwks krvq'   # Replace with your Google
 mail = Mail(app)
 
 # --- DATABASE SETUP ---
-basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'run_attendance.db')
+# --- FIXED DATABASE SETUP (SUPABASE & SQLITE FALLBACK) ---
+database_url = os.environ.get('DATABASE_URL')
+
+if database_url:
+    if database_url.startswith("postgres://"):
+        database_url = database_url.replace("postgres://", "postgresql://", 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+else:
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'run_attendance.db')
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -276,8 +285,14 @@ def clear_device(user_id):
 @app.route('/logout')
 def logout(): session.clear(); return redirect('/')
 
+# --- AUTOMATIC TABLE INITIALIZATION ---
+with app.app_context():
+    try:
+        db.create_all()
+        print("Database tables verified and created successfully in Supabase! 🎉")
+    except Exception as e:
+        print(f"Database table creation failed: {e}")
+
 if __name__ == '__main__':
-    import os
-    # Render will inject a PORT environment variable dynamically
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
