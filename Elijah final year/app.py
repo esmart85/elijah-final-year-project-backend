@@ -208,7 +208,7 @@ def admin_dashboard():
             AttendanceLog.full_name, 
             AttendanceLog.matric_no, 
             db.func.count(AttendanceLog.id).label('attended')
-        ).filter_by(course_code=cc).group_by(AttendanceLog.matric_no).all()
+        ).filter_by(course_code=cc).group_by(AttendanceLog.matric_no, AttendanceLog.full_name).all()
         return render_template('admin_dash.html', summary_logs=sum_logs, total_held=total, course_name=cc, view_mode="students")
     return render_template('admin_dash.html', courses=COURSES, view_mode="courses", open_sessions=OPEN_SESSIONS)
 
@@ -256,7 +256,7 @@ def download_course_report(course_code):
         db.func.count(AttendanceLog.id).label('attended_count')
     ).join(AttendanceLog, User.id_number == AttendanceLog.matric_no)\
      .filter(AttendanceLog.course_code == course_code)\
-     .group_by(User.id_number).all()
+     .group_by(User.id_number, User.full_name).all()
 
     si = StringIO()
     cw = csv.writer(si)
