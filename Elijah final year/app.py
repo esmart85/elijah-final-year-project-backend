@@ -12,19 +12,19 @@ from flask import flash
 app = Flask(__name__, static_folder='static')
 app.secret_key = "run_biometric_final_2026_locked"
 
-# --- EMAIL CONFIGURATION (Update with your details) ---
+# --- EMAIL CONFIGURATION ---
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'eirekholoelijah6@gmail.com' # Replace with your school or system email
-app.config['MAIL_PASSWORD'] = 'egul ooyn xwks krvq'   # Replace with your Google App Password
+app.config['MAIL_USERNAME'] = 'eirekholoelijah6@gmail.com' 
+app.config['MAIL_PASSWORD'] = 'egul ooyn xwks krvq'   
 mail = Mail(app)
 
-# --- DATABASE SETUP ---
 # --- FIXED DATABASE SETUP (SUPABASE & SQLITE FALLBACK) ---
 database_url = os.environ.get('DATABASE_URL')
 
 if database_url:
+    # Render uses postgres:// by default, but SQLAlchemy needs postgresql://
     if database_url.startswith("postgres://"):
         database_url = database_url.replace("postgres://", "postgresql://", 1)
     app.config['SQLALCHEMY_DATABASE_URI'] = database_url
@@ -44,7 +44,7 @@ class User(db.Model):
     password = db.Column(db.String(100))
     role = db.Column(db.String(10)) 
     device_id = db.Column(db.String(200), nullable=True)
-    otp = db.Column(db.String(6), nullable=True) # Added to store OTP
+    otp = db.Column(db.String(6), nullable=True) 
 
 class CourseSession(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -89,39 +89,33 @@ def home(): return render_template('login.html')
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        # Get data from the form
         uid = request.form.get('user_id', '').strip().upper()
         pwd = request.form.get('password', '').strip()
         current_device = request.form.get('device_id') 
 
-        # Query the database
         user = User.query.filter_by(id_number=uid, password=pwd).first()
         
         if user:
-            # AUTO-LOCK FEATURE: If device was reset by admin, lock to current phone
             if user.role == 'student' and user.device_id is None:
                 user.device_id = current_device
                 db.session.commit()
             
-            # Save user data to the session
             session.update({
                 'user_id': user.id_number, 
                 'full_name': user.full_name, 
                 'role': user.role
             })
             
-            # Redirect based on role
             if user.role == 'lecturer':
                 return redirect(url_for('admin_dashboard'))
             else:
                 return redirect(url_for('student_dashboard'))
         
-        # --- UPDATED: FLASH ERROR AND REDIRECT INSTEAD OF RETURNING STRING ---
         flash("Invalid Credentials. Please check your ID or password.", "danger")
-        return redirect(url_for('home')) # Or redirect(url_for('login'))
+        return redirect(url_for('home'))
 
-    # If the method is GET, show the login screen
     return render_template('login.html')
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -161,19 +155,17 @@ def forgot_password():
         user = User.query.filter_by(email=email).first()
         
         if user:
-            # Generate 6-digit OTP
             otp_code = str(random.randint(100000, 999999))
             user.otp = otp_code
             db.session.commit()
             
-            # Send Email
             msg = Message("RUN Attendance Password Reset", 
                           sender=app.config['MAIL_USERNAME'],
                           recipients=[user.email])
             msg.body = f"Hello {user.full_name}, your OTP for password reset is: {otp_code}"
             mail.send(msg)
             
-            return render_template('reset_password.html', email=email) # Redirect to a page to enter OTP
+            return render_template('reset_password.html', email=email)
         return "Email not found in our system."
     return render_template('forgot_password.html')
 
@@ -186,7 +178,7 @@ def reset_password_verify():
     user = User.query.filter_by(email=email, otp=user_otp).first()
     if user:
         user.password = new_password
-        user.otp = None # Clear OTP after use
+        user.otp = None 
         db.session.commit()
         return "Password Reset Successful! <a href='/'>Login now</a>"
     return "Invalid OTP. <a href='/forgot_password'>Try again</a>"
@@ -237,7 +229,6 @@ def mark_attendance():
     
     user = User.query.filter_by(id_number=session.get('user_id')).first()
     
-    # --- DEVICE BINDING SECURITY LAYER ---
     if user.role == 'student' and data.get('device') != user.device_id: 
         return jsonify({"message": "Unauthorized device! Reset via Admin if you changed phones."})
     
