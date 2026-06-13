@@ -21,15 +21,20 @@ app.config['MAIL_PASSWORD'] = 'egul ooyn xwks krvq'   # Replace with your Google
 mail = Mail(app)
 
 # --- DATABASE SETUP ---
-# Putting the clean connection string directly here so Render can't miss it
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres.ktvagrhteattxxliwgop:Huntuathebighead%402004@aws-0-eu-central-1.pooler.supabase.com:6543/postgres'
+
+# Hardcoding your fresh, clean connection link directly
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres.yournewid:huntuathebighead2004@aws-0-eu-central-1.pooler.supabase.com:6543/postgres'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# Force the tables to build right now
+# Force Supabase to build the missing 'user' table on boot
 with app.app_context():
-    db.create_all()
+    try:
+        db.create_all()
+        print("Database tables created successfully in Supabase! 🎉")
+    except Exception as e:
+        print(f"Database creation failed: {e}")
     
 # --- MODELS ---
 class User(db.Model):
