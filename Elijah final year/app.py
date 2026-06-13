@@ -139,12 +139,14 @@ def register():
             device_id=device_id
         )
         
-        try:
+try:
             db.session.add(new_user)
             db.session.commit()
             return redirect(url_for('login'))
-        except:
-            return "Error: Email or ID Number already exists.", 400
+        except Exception as e:
+            # This will print the ACTUAL database error to your Render logs so we can see it!
+            print(f"REGISTRATION FAILURE REASON: {str(e)}")
+            return f"Backend Error: {str(e)}", 400
             
     return render_template('register.html')
 
