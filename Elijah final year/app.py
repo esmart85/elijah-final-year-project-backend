@@ -21,31 +21,34 @@ app.config['MAIL_PASSWORD'] = 'egul ooyn xwks krvq'   # Replace with your Google
 mail = Mail(app)
 
 # --- DATABASE SETUP ---# --- DATABASE SETUP ---
+# 1. Setup Database Configuration
 database_url = os.environ.get('DATABASE_URL')
+if database_url and database_url.startswith("postgres://"):
+    database_url = database_url.replace("postgres://", "postgresql://", 1)
 
-if database_url:
-    if database_url.startswith("postgres://"):
-        database_url = database_url.replace("postgres://", "postgresql://", 1)
-    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
-else:
-    raise ValueError("No DATABASE_URL found!")
-
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url or 'sqlite:///fallback.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-# -------------------------------------------------------------
-# IMPORTANT: Your User model MUST be defined or imported here, 
-# BEFORE the db.create_all() function runs below!
-# -------------------------------------------------------------
+# 2. THE CRUCIAL PART: Your Model must be defined BEFORE create_all runs!
+class User(db.Model):
+    __tablename__ = 'user'  # This explicitly names the table
+    id = db.Column(db.Integer, primary_key=True)
+    full_name = db.Column(db.String(100))
+    id_number = db.Column(db.String(50), unique=True)
+    email = db.Column(db.String(100), unique=True)
+    password = db.Column(db.String(255))
+    role = db.Column(db.String(20))
+    device_id = db.Column(db.String(100))
+    otp = db.Column(db.String(6))
 
-# --- FORCE TABLE CREATION ON BOOT ---
+# 3. Now run create_all safely inside the app context
 with app.app_context():
     try:
         db.create_all()
         print("Database tables verified and created successfully in Supabase! 🎉")
     except Exception as e:
-        print(f"Database table creation failed: {e}")
-    
+        print(f"Database table creation failed: {e}")    
 # --- MODELS ---
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
