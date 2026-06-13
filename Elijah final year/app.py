@@ -20,21 +20,31 @@ app.config['MAIL_USERNAME'] = 'eirekholoelijah6@gmail.com' # Replace with your s
 app.config['MAIL_PASSWORD'] = 'egul ooyn xwks krvq'   # Replace with your Google App Password
 mail = Mail(app)
 
-# --- DATABASE SETUP ---
+# --- DATABASE SETUP ---# --- DATABASE SETUP ---
+database_url = os.environ.get('DATABASE_URL')
 
-# Hardcoding your fresh, clean connection link directly
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres.knigevgkfxspdzcivddy:huntuathebighead2004@aws-0-eu-west-1.pooler.supabase.com:5432/postgres'
+if database_url:
+    if database_url.startswith("postgres://"):
+        database_url = database_url.replace("postgres://", "postgresql://", 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+else:
+    raise ValueError("No DATABASE_URL found!")
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
 db = SQLAlchemy(app)
 
-# Force Supabase to build the missing 'user' table on boot
+# -------------------------------------------------------------
+# IMPORTANT: Your User model MUST be defined or imported here, 
+# BEFORE the db.create_all() function runs below!
+# -------------------------------------------------------------
+
+# --- FORCE TABLE CREATION ON BOOT ---
 with app.app_context():
     try:
         db.create_all()
-        print("Database tables created successfully in Supabase! 🎉")
+        print("Database tables verified and created successfully in Supabase! 🎉")
     except Exception as e:
-        print(f"Database creation failed: {e}")
+        print(f"Database table creation failed: {e}")
     
 # --- MODELS ---
 class User(db.Model):
