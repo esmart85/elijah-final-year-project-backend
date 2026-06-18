@@ -46,7 +46,7 @@
                 <tbody>
                     {% if view_mode == "manage" %}
                         {% for s in students %}<tr class="r-item"><td>{{ s.full_name }}</td><td>{{ s.id_number }}</td><td><span class="badge {{ 'bg-success' if s.device_id else 'bg-secondary' }}">{{ 'Locked' if s.device_id else 'Open' }}</span></td><td><a href="/admin/clear_device/{{ s.id }}" class="btn btn-warning btn-sm" style="font-size: 0.7rem;">Reset Phone</a></td></tr>{% endfor %}
-                    {% align_items_center %}
+                    {% else %}
                         {% for l in summary_logs %}
                         {% set p = (l.attended / total_held * 100) | round(1) if total_held > 0 else 0 %}
                         <tr class="r-item"><td>{{ l.full_name }}</td><td>{{ l.matric_no }}</td><td><div class="progress" style="height: 15px;"><div class="progress-bar {{ 'bg-danger' if p < 70 else 'bg-success' }}" style="width: {{ p }}%">{{ l.attended }}/{{ total_held }}</div></div></td><td><b>{{ p }}%</b></td></tr>
