@@ -210,7 +210,7 @@ def admin_dashboard():
             db.func.count(AttendanceLog.id).label('attended')
         ).filter_by(course_code=cc).group_by(AttendanceLog.matric_no, AttendanceLog.full_name).all()
         return render_template('admin_dash.html', summary_logs=sum_logs, total_held=total, course_name=cc, view_mode="students")
-    return render_template('admin_dash.html', courses=COURSES, view_mode="courses", open_sessions=OPEN_SESSIONS)
+    return render_template('admin_dash.html', courses=COURSES, view_mode="courses", open_sessions=OPEN_SESSIONS, full_name=session.get('full_name'))
 
 @app.route('/admin/toggle_session/<course_code>')
 def toggle_session(course_code):
